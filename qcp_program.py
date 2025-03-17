@@ -1013,7 +1013,7 @@ class Circuit(BaseMixin):
             epsilon += k_applied
             if np.all(epsilon.vector == 0):
                 epsilon.vector += 1e-5
-        self.state.vector: np.ndarray = epsilon.vector
+        self.state.vector = epsilon.vector
         self.state.norm()                  #not the most elegent way to do it but only way ive found that works
         self.state.name = new_name
         if not isinstance(self.state.vector, np.ndarray):
@@ -1078,8 +1078,11 @@ class Circuit(BaseMixin):
             self.final_gate = self.final_gate * gate
         self.final_gate.name = f"Final Gate"
         if text:
-            print_array(f"The final Gate is:")
-            print_array(self.final_gate)
+            if self.final_gate.dim < 9:
+                print_array(f"The final Gate is:")
+                print_array(self.final_gate)
+            else:
+                print_array(f"{self.final_gate.dim} x {self.final_gate.dim} final gate computed")
         return self.final_gate
     
     def apply_final_gate(self, text=True) -> Qubit:
@@ -1416,37 +1419,10 @@ large_oracle_values = [1120,2005,3003,4010,5000,6047,7023,8067,9098,10000,11089,
 
 def main():
     """Where you can run commands without it affecting programs that import this program"""
-    print_array(q0 @ q0)
-    print_array(Hadamard + Hadamard)
-    print_array(Hadamard - Hadamard)
-    testp = Density(state=qp)
-    testm = Density(state = qm)
-    testp2 = Density(state=qp)
-    print_array(testp + testm)
-    print_array(testp - testm)
-
-    print_array(trace(CNot))
-    print_array(testp == testp2)
-    M_test1 = Measure(state=qm @ qp)
-    M_test2 = Measure(state=qm @ qp)
-    print_array(M_test1 == M_test2)
-    print_array(M_test1.probs)
-    print_array(Density(state_a = q1, state_b = qpi).fidelity())
-    test = Circuit(n=1, state=qp, noisy=True, Q_channel="P flip", prob=0.5)
-    test.get_info("state")
-    test.apply_final_gate()
-    test.list_probs()
-    Grover(8).run()
-    print_array(Hadamard)
-    print_array(Hadamard @ Hadamard)
-    print_array(Density(state=qpi) @ Density(state=qmi))
-    Grover([1], n=3, iter_calc="floor").run()
-    print_array(Qubit(type="seperable", vectors=[q0,q0,q1]))
-    se_test = Qubit(type="mixed", vectors=[q0,q1], weights=[0.2,0.8],detailed=True)
-    print_array(se_test)
-    print_array(se_test.density)
-    print_array(se_test.se)
-    se_test = Qubit(type="mixed", vectors=[[1,0],[0,1]], weights=[0.2,0.8],detailed=True)
-    print_array(se_test)
-    print_array(se_test.density)
-    print_array(se_test.se)
+    demo_circuit = Circuit(n=4)
+    demo_circuit.add_gate(Hadamard @ Identity @ Hadamard @ Identity)
+    demo_circuit.add_gate(Identity @ X_Gate @ Identity @ X_Gate)
+    demo_circuit.add_single_gate(gate=Hadamard, gate_location=0)
+    demo_circuit.apply_final_gate()
+    demo_circuit.list_probs()
+    demo_circuit.measure_state()
