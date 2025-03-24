@@ -1230,20 +1230,20 @@ class Grover(StrMixin):                                               #this is t
         timer = Timer()
         print_array(f"Running FWHT algorithm:") if self.fast else print_array(f"Running algorithm:")
         qub, had = self.init_states()   #this is where the prveious function is called and the states and hadamard are produced
+        print(f"\rIteration {it + 1}: Applying Initialisation Hadamard                                     ", end="")
+        hadamard_qubit = had * qub       #applies a hadamard to every qubit                           STEP 1
         while it < int(self.it):   #this is where the bulk of the computation actually occurs and is where the algorithm is actually applied
             print(f"\rIteration {it + 1}:                                                                  ", end="")
             if it != 0:
                 qub: Qubit = final_state
-            print(f"\rIteration {it + 1}: Applying first Hadamard                                          ", end="")
-            hadamard_qubit = had * qub       #applies a hadamard to every qubit                           STEP 1
             print(f"\rIteration {it + 1}: Applying phase oracle                                            ", end="")
             oracle_qubit = self.phase_oracle(hadamard_qubit, self.oracle_values)              #STEP 2   phase flips the given oracle values
-            print(f"\rIteration {it + 1}: Applying second Hadamard                                         ", end="")
+            print(f"\rIteration {it + 1}: Applying first Hadamard                                          ", end="")
             intermidary_qubit = had * oracle_qubit                                            #STEP 3 Applies the hadamard again
             print(f"\rIteration {it + 1}: Flipping the Qubits phase except first Qubit                     ", end="")
             intermidary_qubit.vector *= -1           #inverts all of the phases of the qubit values             STEP 4a
             intermidary_qubit.vector[0] *= -1              #inverts back the first qubits phase                 STEP 4b
-            print(f"\rIteration {it + 1}: Applying third and final Hadamard                                ", end="")
+            print(f"\rIteration {it + 1}: Applying second Hadamard                                ", end="")
             final_state = had * intermidary_qubit        #applies yet another hadamard gate to the qubits    STEP 5
             it += 1                   #adds to the iteration counter
             print(f"\r                                                                                     Time elapsed:{timer.elapsed()[0]:.4f} secs", end="")
@@ -1419,10 +1419,5 @@ large_oracle_values = [1120,2005,3003,4010,5000,6047,7023,8067,9098,10000,11089,
 
 def main():
     """Where you can run commands without it affecting programs that import this program"""
-    demo_circuit = Circuit(n=4)
-    demo_circuit.add_gate(Hadamard @ Identity @ Hadamard @ Identity)
-    demo_circuit.add_gate(Identity @ X_Gate @ Identity @ X_Gate)
-    demo_circuit.add_single_gate(gate=Hadamard, gate_location=0)
-    demo_circuit.apply_final_gate()
-    demo_circuit.list_probs()
-    demo_circuit.measure_state()
+    Grover(16, n=16).run()
+    Grover(16).run()
